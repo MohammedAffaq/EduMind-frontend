@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
+    volumes:
+      - mongodata:/data/db
+    ports:
+      - "27017:27017"
+
+  backend:
+    build:
+      context: ./backend/api
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/edumind
+      - JWT_SECRET=replace_this_long_secret
+      - PORT=5001
+    depends_on:
+      - mongo
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend/api:/usr/src/app
+
+volumes:
+  mongodata:
+    driver: local

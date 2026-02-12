@@ -1,0 +1,568 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import SimplePieChart from '../components/SimplePieChart';
+import SimpleLineChart from '../components/SimpleLineChart';
+import {
+  LayoutDashboard,
+  GraduationCap,
+  Users,
+  Bus,
+  DollarSign,
+  CalendarCheck,
+  LogOut,
+  Search,
+  Bell,
+  Menu,
+  Settings,
+  Download,
+  ShieldCheck,
+  BarChart2,
+  UserCog,
+  Wrench,
+  User
+} from 'lucide-react';
+const AnalyticsPage = ({ onLogout }) => {
+  const navigate = useNavigate();
+  const [adminName, setAdminName] = React.useState('');
+  const [selectedMonth, setSelectedMonth] = React.useState('October');
+  const [selectedClass, setSelectedClass] = React.useState('All Classes');
+  const [selectedSection, setSelectedSection] = React.useState('All Sections');
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
+  const [studentDistActiveIndex, setStudentDistActiveIndex] = React.useState(null);
+  const [revenueActiveIndex, setRevenueActiveIndex] = React.useState(null);
+  const [selectedYear, setSelectedYear] = React.useState('2024');
+
+  React.useEffect(() => {
+    const fetchAdminName = () => {
+      const storedName = localStorage.getItem('userName');
+      if (storedName) {
+        setAdminName(storedName);
+        return;
+      }
+      try {
+        const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+        if (registeredUsers.admin && registeredUsers.admin.firstName) {
+          setAdminName(`${registeredUsers.admin.firstName} ${registeredUsers.admin.lastName}`);
+        } else {
+          setAdminName('Admin');
+        }
+      } catch (error) {
+        console.error('Error fetching admin name:', error);
+      }
+    };
+    fetchAdminName();
+  }, []);
+
+  React.useEffect(() => {
+    const fetchPendingRequests = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/student-requests');
+        const result = await response.json();
+        if (result.success) {
+          setPendingRequestsCount(result.requests.filter(req => req.status === 'pending').length);
+        }
+      } catch (error) {
+        console.error('Error fetching pending requests:', error);
+      }
+    };
+    fetchPendingRequests();
+  }, []);
+
+  // Analytics data from API
+  const [, setAnalytics] = React.useState(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    async function loadAnalytics() {
+      try {
+        const token = localStorage.getItem('currentUser') ? JSON.parse(localStorage.getItem('currentUser')).token : null;
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const res = await fetch('/api/analytics', { headers });
+        const json = await res.json();
+        if (mounted && json.success) setAnalytics(json);
+      } catch (err) {
+        console.error('Error loading analytics:', err);
+      }
+    }
+    loadAnalytics();
+    return () => { mounted = false; };
+  }, []);
+
+  // Sample data for charts
+  const classAttendanceData = [
+    { label: 'Class 1', value: 95 },
+    { label: 'Class 2', value: 92 },
+    { label: 'Class 3', value: 90 },
+    { label: 'Class 4', value: 93 },
+    { label: 'Class 5', value: 94 },
+    { label: 'Class 6', value: 89 },
+    { label: 'Class 7', value: 91 },
+    { label: 'Class 8', value: 88 },
+    { label: 'Class 9', value: 90 },
+    { label: 'Class 10', value: 92 },
+    { label: 'Class 11', value: 87 },
+    { label: 'Class 12', value: 85 },
+  ];
+
+  const passRateData = [
+    { year: 2020, rate: 85 },
+    { year: 2021, rate: 88 },
+    { year: 2022, rate: 92 },
+    { year: 2023, rate: 91 },
+    { year: 2024, rate: 94 },
+  ];
+
+  const academicPerformanceData = [
+    { subject: 'Mathematics', passRate: 92 },
+    { subject: 'Science', passRate: 88 },
+    { subject: 'English', passRate: 95 },
+    { subject: 'History', passRate: 85 },
+    { subject: 'Geography', passRate: 90 },
+  ];
+
+  const revenueBreakdownDataByYear = {
+    '2020': [
+      { label: 'Tuition Fees', value: 70 },
+      { label: 'Transport Fees', value: 20 },
+      { label: 'Other', value: 10 },
+    ],
+    '2021': [
+      { label: 'Tuition Fees', value: 72 },
+      { label: 'Transport Fees', value: 18 },
+      { label: 'Other', value: 10 },
+    ],
+    '2022': [
+      { label: 'Tuition Fees', value: 74 },
+      { label: 'Transport Fees', value: 16 },
+      { label: 'Other', value: 10 },
+    ],
+    '2023': [
+      { label: 'Tuition Fees', value: 76 },
+      { label: 'Transport Fees', value: 14 },
+      { label: 'Other', value: 10 },
+    ],
+    '2024': [
+      { label: 'Tuition Fees', value: 75 },
+      { label: 'Transport Fees', value: 15 },
+      { label: 'Other', value: 10 },
+    ],
+    '2025': [
+      { label: 'Tuition Fees', value: 78 },
+      { label: 'Transport Fees', value: 12 },
+      { label: 'Other', value: 10 },
+    ],
+  };
+
+  const revenueBreakdownData = revenueBreakdownDataByYear[selectedYear] || revenueBreakdownDataByYear['2024'];
+
+  const getAttendanceColor = (value) => {
+    if (value >= 95) return '#22c55e'; // green-500
+    if (value >= 92) return '#84cc16'; // lime-500
+    if (value >= 90) return '#facc15'; // yellow-400
+    if (value >= 88) return '#fb923c'; // orange-400
+    return '#f87171'; // red-400
+  };
+
+  const ATTENDANCE_COLORS = classAttendanceData.map(d => getAttendanceColor(d.value));
+
+  const avgAttendance = (classAttendanceData.reduce((acc, curr) => acc + curr.value, 0) / classAttendanceData.length).toFixed(1);
+
+  const REVENUE_COLORS = ["#60a5fa", "#34d399", "#fbbf24"];
+
+  const filteredPerformance = academicPerformanceData.filter(subject =>
+    subject.subject.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const exportChart = (chartId, fileName) => {
+    const svgElement = document.getElementById(chartId)?.querySelector('svg');
+    if (!svgElement) return;
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgElement);
+    const img = new Image();
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = svgElement.clientWidth * 2 || 1000; // High res
+      canvas.height = svgElement.clientHeight * 2 || 600;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      const pngUrl = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `${fileName}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  };
+
+  // Custom Simple Charts Components
+
+
+  const SimpleDonutChart = ({ percentage, color, size = 160, id }) => {
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <div className="relative flex items-center justify-center" style={{ width: size, height: size }} id={id}>
+        <svg className="transform -rotate-90 w-full h-full" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r={radius} stroke="#f3f4f6" strokeWidth="10" fill="none" />
+          <circle cx="50" cy="50" r={radius} stroke={color} strokeWidth="10" fill="none" strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="block text-3xl font-bold text-text">{percentage}%</span>
+          <span className="text-xs text-text-secondary uppercase font-bold tracking-wider">Pass Rate</span>
+        </div>
+      </div>
+    );
+  };
+
+  /* SimpleBarChart replaced by SimplePieChart */
+
+  return (
+    <div className="flex h-screen bg-slate-100 font-sans text-gray-800 overflow-hidden">
+      {/* Left Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out shadow-sm ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+        <div className="p-4 flex items-center justify-center gap-3">
+          <img src="/assets/logo.png" alt="EduMind Logo" className="h-24 w-auto max-w-full object-contain" />
+        </div>
+
+        <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+          <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" onClick={() => navigate('/admin')} />
+          <NavItem icon={<ShieldCheck size={20} />} label="Verification" onClick={() => navigate('/admin', { state: { activeView: 'verification' } })} badge={pendingRequestsCount} />
+          <NavItem icon={<UserCog size={20} />} label="User Management" onClick={() => navigate('/admin', { state: { activeView: 'users' } })} />
+          <NavItem icon={<GraduationCap size={20} />} label="Students" onClick={() => navigate('/admin/students')} />
+          <NavItem icon={<Users size={20} />} label="Teachers" onClick={() => navigate('/admin/teachers')} />
+          <NavItem icon={<User size={20} />} label="Parents" onClick={() => navigate('/admin/parents')} />
+          <NavItem icon={<Bus size={20} />} label="Driver & Vehicles" onClick={() => navigate('/admin/drivers')} />
+          <NavItem icon={<DollarSign size={20} />} label="Finance" onClick={() => navigate('/admin/finance')} />
+          <NavItem icon={<CalendarCheck size={20} />} label="Attendance" onClick={() => navigate('/admin/attendance')} />
+          <NavItem icon={<Wrench size={20} />} label="Maintenance" onClick={() => navigate('/admin/maintenance')} />
+          <NavItem icon={<Settings size={20} />} label="Settings" onClick={() => navigate('/admin/settings')} />
+        </nav>
+
+        <div className="p-4 border-t border-gray-100">
+          <button
+            onClick={onLogout}
+            className="flex items-center gap-3 text-gray-600 hover:text-red-600 hover:bg-red-50 w-full p-3 rounded-xl transition-colors duration-200"
+          >
+            <LogOut size={20} />
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main Content Wrapper */}
+      <div className="flex-1 lg:ml-64 flex flex-col h-screen">
+        {/* Top Header */}
+        <header className="h-20 bg-card/80 backdrop-blur-md border-b border-gray-100 flex justify-between items-center px-8 sticky top-0 z-10">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 lg:hidden"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="relative w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search analytics, reports, data..."
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary/20 focus:bg-white transition-all outline-none text-sm text-text placeholder-text-secondary"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => navigate('/admin/notifications')}
+              className="relative p-2 text-text-secondary hover:text-primary transition-colors"
+            >
+              <Bell size={28} />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full border-2 border-white"></span>
+            </button>
+            <button onClick={() => navigate('/admin/profile')} className="flex items-center gap-3 pl-6 border-l border-gray-100 hover:bg-gray-50 rounded-lg -ml-2 p-2 transition-colors">
+              <div className="text-right hidden md:block">
+                <p className="text-sm font-bold text-text">{adminName}</p>
+                <p className="text-xs text-text-secondary font-medium">Admin Administrator</p>
+              </div>
+              <img
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(adminName)}&background=c7d2fe&color=3730a3`}
+                alt="Profile"
+                className="w-10 h-10 rounded-full border-2 border-white shadow-sm"
+              />
+            </button>
+          </div>
+        </header>
+
+        {/* Dashboard Content */}
+        <main className="flex-1 overflow-y-auto p-8 bg-slate-100">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Page Title and Filters */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-text mb-2">Analytics</h1>
+                <p className="text-text-secondary">Comprehensive insights into school performance and trends</p>
+              </div>
+
+              {/* Filters */}
+              <div className="flex flex-wrap gap-4">
+                <select
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                  className="bg-card border border-gray-200 text-text-secondary rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option>January</option>
+                  <option>February</option>
+                  <option>March</option>
+                  <option>April</option>
+                  <option>May</option>
+                  <option>June</option>
+                  <option>July</option>
+                  <option>August</option>
+                  <option>September</option>
+                  <option>October</option>
+                  <option>November</option>
+                  <option>December</option>
+                </select>
+
+                <select
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  className="bg-card border border-gray-200 text-text-secondary rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option>All Classes</option>
+                  <option>Class 7</option>
+                  <option>Class 8</option>
+                  <option>Class 9</option>
+                  <option>Class 10</option>
+                  <option>Class 11</option>
+                  <option>Class 12</option>
+                </select>
+
+                <select
+                  value={selectedSection}
+                  onChange={(e) => setSelectedSection(e.target.value)}
+                  className="bg-card border border-gray-200 text-text-secondary rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option>All Sections</option>
+                  <option>Section A</option>
+                  <option>Section B</option>
+                  <option>Section C</option>
+                </select>
+
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(e.target.value)}
+                  className="bg-card border border-gray-200 text-text-secondary rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option>2020</option>
+                  <option>2021</option>
+                  <option>2022</option>
+                  <option>2023</option>
+                  <option>2024</option>
+                  <option>2025</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Attendance Trend */}
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-lg text-text">Class-Wise Attendance Overview</h3>
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => exportChart('attendance-chart', 'attendance_trend')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="Export as PNG"><Download size={18} /></button>
+                  </div>
+                </div>
+                <div className="h-80 flex flex-col md:flex-row items-center gap-6">
+                  <div className="w-full md:w-1/2 h-64 flex items-center justify-center relative">
+                    <SimplePieChart 
+                      data={classAttendanceData} 
+                      colors={ATTENDANCE_COLORS} 
+                      id="attendance-chart" 
+                      activeIndex={studentDistActiveIndex}
+                      onHover={setStudentDistActiveIndex}
+                      innerRadius={0.6}
+                    />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span className="text-3xl font-bold text-gray-800">{avgAttendance}%</span>
+                      <span className="text-xs text-gray-500 font-medium">Avg Attendance</span>
+                    </div>
+                  </div>
+                  <div className="w-full md:w-1/2 overflow-y-auto max-h-64 custom-scrollbar pr-2">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                      {classAttendanceData.map((d, idx) => (
+                          <li key={idx} className={`text-xs flex items-center gap-2 p-1 rounded cursor-pointer ${studentDistActiveIndex === idx ? 'bg-gray-50' : ''}`} onMouseEnter={() => setStudentDistActiveIndex(idx)} onMouseLeave={() => setStudentDistActiveIndex(null)}>
+                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: ATTENDANCE_COLORS[idx % ATTENDANCE_COLORS.length] }}></span>
+                            <span className="flex-1 truncate">{d.label}</span>
+                            <span className="font-semibold">{d.value}%</span>
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Academic Performance */}
+              <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="font-bold text-lg text-text">Academic Performance</h3>
+                  <div className="flex gap-2">
+                    <button onClick={() => exportChart('academic-chart', 'academic_performance')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="Export as PNG"><Download size={18} /></button>
+                    <BarChart2 className="text-text-secondary" size={20} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center py-6 h-48">
+                  <SimpleDonutChart percentage={88} color="#5A4FCF" id="academic-chart" />
+                </div>
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <div className="text-center p-3 bg-gradient-to-r from-blue-400 via-cyan-500 to-teal-500 rounded-lg hover:from-blue-500 hover:via-cyan-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="text-blue-200">📊</span>
+                      <p className="text-xs text-white font-bold">Avg Attendance</p>
+                    </div>
+                    <p className="text-lg font-bold text-white">94.2%</p>
+                  </div>
+                  <div className="text-center p-3 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-lg hover:from-yellow-500 hover:via-orange-600 hover:to-red-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <span className="text-yellow-200">⭐</span>
+                      <p className="text-xs text-white font-bold">Top Performers</p>
+                    </div>
+                    <p className="text-sm font-bold text-white">15 Students</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Pass Rate Trend */}
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-lg text-text">Student Pass Rate Trend (Last 5 Years)</h3>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => exportChart('pass-rate-chart', 'pass_rate_trend')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="Export as PNG"><Download size={18} /></button>
+                </div>
+              </div>
+              <div className="h-64" id="pass-rate-chart">
+                <SimpleLineChart 
+                  data={passRateData}
+                  xAxisKey="year"
+                  dataKey="rate"
+                  color="#10b981"
+                />
+              </div>
+            </div>
+
+            {/* Revenue Breakdown */}
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-lg text-text">Revenue Breakdown ({selectedYear})</h3>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => exportChart('revenue-chart', 'revenue_breakdown')} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="Export as PNG"><Download size={18} /></button>
+                </div>
+              </div>
+              <div className="h-64 flex flex-col lg:flex-row items-center justify-center gap-8">
+                <div className="flex justify-center">
+                  <SimplePieChart
+                    data={revenueBreakdownData}
+                    colors={REVENUE_COLORS}
+                    id="revenue-chart"
+                    activeIndex={revenueActiveIndex}
+                    onHover={setRevenueActiveIndex}
+                  />
+                </div>
+                <div className="space-y-4">
+                  {revenueBreakdownData.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div
+                        className="w-4 h-4 rounded-full"
+                        style={{ backgroundColor: REVENUE_COLORS[index] }}
+                      ></div>
+                      <div>
+                        <div className="font-medium text-gray-900">{item.label}</div>
+                        <div className="text-sm text-gray-600">{item.value}%</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Subject-wise Performance */}
+            <div className="bg-card p-6 rounded-xl shadow-sm border border-gray-100">
+              <h3 className="font-bold text-lg text-text mb-6">Subject-wise Performance</h3>
+              <div className="space-y-4">
+                {filteredPerformance.map((subject, index) => {
+                  const percentage = subject.passRate;
+                  let colorClass = 'bg-red-500';
+                  if (percentage >= 90) colorClass = 'bg-green-500';
+                  else if (percentage >= 80) colorClass = 'bg-blue-500';
+                  else if (percentage >= 70) colorClass = 'bg-yellow-500';
+
+                  return (
+                  <div key={index} className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-sm ${colorClass}`}>
+                          {subject.subject.charAt(0)}
+                      </div>
+                      <div>
+                        <span className="font-bold text-gray-800 block">{subject.subject}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-1 ml-4">
+                      <div className="flex-1 bg-gray-100 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-500 ${colorClass}`}
+                          style={{ width: `${subject.passRate}%` }}
+                        ></div>
+                      </div>
+                      <span className="font-bold text-text text-sm w-12 text-right">{subject.passRate}%</span>
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+// Helper Components
+const NavItem = ({ icon, label, active, onClick, badge }) => (
+  <button onClick={onClick} className={`flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 group w-full ${active ? 'bg-sky-50 text-sky-600 font-bold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 font-medium'}`}>
+    <span className={`${active ? 'text-sky-600' : 'text-gray-400 group-hover:text-sky-600 transition-colors'}`}>{icon}</span>
+    <span className="flex-1 text-left">{label}</span>
+    {badge > 0 && (
+      <span className="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg ring-2 ring-white">
+        {badge}
+      </span>
+    )}
+  </button>
+);
+
+export default AnalyticsPage;

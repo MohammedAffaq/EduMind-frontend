@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": false,
+    "noEmit": true
+  },
+  "include": ["src", "src/**/*", "src/**/*.jsx", "src/**/*.js", "src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "build"]
+}
