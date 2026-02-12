@@ -237,7 +237,6 @@ export default function SignUpPage() {
       const result = await response.json();
 
       if (result.success) {
-        setUserId(result.userId);
         setStep('otp');
         setResendTimer(60); // 60 seconds cooldown
       } else {
