@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, ArrowLeft, Shield, GraduationCap, Users, Briefcase, AlertCircle, Mail, Eye, EyeOff, Plus, Trash2, Calendar, Upload } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
@@ -225,7 +226,7 @@ export default function SignUpPage() {
     setErrors({});
 
     try {
-      const response = await fetch('/api/auth/send-otp', {
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -268,7 +269,7 @@ export default function SignUpPage() {
     setErrors({});
 
     try {
-      const response = await fetch('/api/auth/verify-otp', {
+      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -281,7 +282,7 @@ export default function SignUpPage() {
       if (result.success) {
         // OTP Verified. Now Register the User!
         try {
-          const registerResponse = await fetch('/api/auth/register', {
+          const registerResponse = await fetch(`${API_URL}/api/auth/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -325,7 +326,7 @@ export default function SignUpPage() {
     setErrors({});
 
     try {
-      const response = await fetch('/api/auth/send-otp', {
+      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

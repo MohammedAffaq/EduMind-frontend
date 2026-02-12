@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, ArrowRight, Loader2, AlertCircle, Shield, GraduationCap, Users, Briefcase, RefreshCw, Upload, Calendar, Phone } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
