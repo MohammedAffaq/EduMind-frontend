@@ -112,8 +112,8 @@ const MessageBubble = ({ message, onDelete }) => {
       )}
       <div
         className={`max-w-sm lg:max-w-lg px-5 py-3 rounded-3xl shadow-sm ${isOutgoing
-            ? 'bg-indigo-600 text-white rounded-br-lg'
-            : 'bg-gray-100 text-gray-800 rounded-bl-lg'
+          ? 'bg-indigo-600 text-white rounded-br-lg'
+          : 'bg-gray-100 text-gray-800 rounded-bl-lg'
           }`}
       >
         {message.attachment && (
@@ -1102,8 +1102,8 @@ const TeacherDashboard = ({ onLogout }) => {
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
                           <div
                             className={`h-2 rounded-full ${(item.submitted / item.total) * 100 >= 90 ? 'bg-green-600' :
-                                (item.submitted / item.total) * 100 >= 70 ? 'bg-blue-600' :
-                                  (item.submitted / item.total) * 100 >= 50 ? 'bg-orange-600' : 'bg-red-600'
+                              (item.submitted / item.total) * 100 >= 70 ? 'bg-blue-600' :
+                                (item.submitted / item.total) * 100 >= 50 ? 'bg-orange-600' : 'bg-red-600'
                               }`}
                             style={{ width: `${(item.submitted / item.total) * 100}%` }}
                           ></div>
@@ -1214,32 +1214,7 @@ const TeacherDashboard = ({ onLogout }) => {
             </div>
           )}
 
-          {/* Logout Confirmation Modal */}
-          {showLogoutModal && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-popIn">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <LogOut className="text-red-600" size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Logout?</h3>
-                <p className="text-gray-600 mb-6">Are you sure you want to logout from your account?</p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowLogoutModal(false)}
-                    className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmLogout}
-                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+
 
           {/* Add Student Request Modal */}
           {showAddRequestModal && (
@@ -1312,8 +1287,8 @@ const TeacherDashboard = ({ onLogout }) => {
                         key={student.id}
                         onClick={() => toggleAttendanceStatus(student.id)}
                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${student.status === 'Present'
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-red-500 bg-red-50'
+                          ? 'border-green-500 bg-green-50'
+                          : 'border-red-500 bg-red-50'
                           }`}
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -1403,10 +1378,10 @@ const TeacherDashboard = ({ onLogout }) => {
                           </td>
                           <td className="px-6 py-4">
                             <span className={`px-2 py-1 rounded text-xs font-bold ${!student.marks ? 'bg-gray-100 text-gray-500' :
-                                parseInt(student.marks) >= 90 ? 'bg-green-100 text-green-700' :
-                                  parseInt(student.marks) >= 75 ? 'bg-blue-100 text-blue-700' :
-                                    parseInt(student.marks) >= 50 ? 'bg-yellow-100 text-yellow-700' :
-                                      'bg-red-100 text-red-700'
+                              parseInt(student.marks) >= 90 ? 'bg-green-100 text-green-700' :
+                                parseInt(student.marks) >= 75 ? 'bg-blue-100 text-blue-700' :
+                                  parseInt(student.marks) >= 50 ? 'bg-yellow-100 text-yellow-700' :
+                                    'bg-red-100 text-red-700'
                               }`}>
                               {!student.marks ? '-' :
                                 parseInt(student.marks) >= 90 ? 'A' :
@@ -1868,6 +1843,33 @@ const TeacherDashboard = ({ onLogout }) => {
           )}
         </main>
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center animate-popIn">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <LogOut className="text-red-600" size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Logout?</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout from your account?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

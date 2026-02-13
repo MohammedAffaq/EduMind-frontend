@@ -582,32 +582,7 @@ const ModernAdminDashboard = ({ onLogout }) => {
                 <div className="absolute bottom-0 left-20 w-40 h-40 bg-purple-400 opacity-10 rounded-full blur-2xl"></div>
               </div>
 
-              {process.env.NODE_ENV === 'development' && (
-                <div className="mt-4">
-                  <button
-                    onClick={async () => {
-                      try {
-                        const res = await fetch('/dev/impersonate/1769621480654');
-                        const json = await res.json();
-                        if (json.success) {
-                          localStorage.setItem('currentUser', JSON.stringify({ id: json.user.id, token: json.token }));
-                          localStorage.setItem('userRole', json.user.role);
-                          localStorage.setItem('isLoggedIn', 'true');
-                          localStorage.setItem('userName', `${json.user.firstName} ${json.user.lastName}`);
-                          window.location.reload();
-                        } else {
-                          alert('Impersonation failed: ' + (json.error || 'Unknown'));
-                        }
-                      } catch (err) {
-                        alert('Error during impersonation: ' + err.message);
-                      }
-                    }}
-                    className="text-sm text-accent underline"
-                  >
-                    Dev: Impersonate Admin (development only)
-                  </button>
-                </div>
-              )}
+
 
               {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -801,7 +776,7 @@ const ModernAdminDashboard = ({ onLogout }) => {
                       <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                         <div className="flex items-center gap-3">
                           <div className={`w-4 h-4 rounded-full ${color === 'green' ? 'bg-green-500' :
-                              color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
+                            color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></div>
                           <span className="font-medium text-gray-800">{item.subject}</span>
                         </div>
@@ -809,13 +784,13 @@ const ModernAdminDashboard = ({ onLogout }) => {
                           <div className="w-32 bg-gray-200 rounded-full h-2">
                             <div
                               className={`h-2 rounded-full ${color === 'green' ? 'bg-green-500' :
-                                  color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
+                                color === 'yellow' ? 'bg-yellow-500' : 'bg-red-500'
                                 }`}
                               style={{ width: `${item.percentage}%` }}
                             ></div>
                           </div>
                           <span className={`font-bold text-sm ${color === 'green' ? 'text-green-600' :
-                              color === 'yellow' ? 'text-yellow-600' : 'text-red-600'
+                            color === 'yellow' ? 'text-yellow-600' : 'text-red-600'
                             }`}>
                             {item.percentage}%
                           </span>
